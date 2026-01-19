@@ -1,0 +1,14 @@
+django>=4.2
+djangorestframework
+requests
+openai
+bandit
+pylint
+safety
+radon
+flake8
+redis
+python-dotenv
+celery
+psycopg2-binary
+markdown
