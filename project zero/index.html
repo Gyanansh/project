@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APK Analyzer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #1a237e;
+        }
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        .upload-form input[type="file"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .upload-form button {
+            background-color: #1e88e5;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        .upload-form button:hover {
+            background-color: #1565c0;
+        }
+        .report-display {
+            border-top: 2px solid #ddd;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .report-section {
+            margin-bottom: 1rem;
+        }
+        .report-section h3 {
+            margin-bottom: 0.5rem;
+            color: #388e3c;
+        }
+        .verdict-malicious { color: #d32f2f; }
+        .verdict-suspicious { color: #f9a825; }
+        .verdict-safe { color: #388e3c; }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1e88e5;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #e3f2fd;
+            color: #1a237e;
+            cursor: pointer;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .reason-list li {
+            background-color: #f9f9f9;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>APK Analyzer</h1>
+    <p>Upload an Android APK file to analyze it for fake banking app characteristics.</p>
+
+    <div class="upload-form">
+        <input type="file" id="apkFile" accept=".apk">
+        <button id="analyzeBtn">Analyze APK</button>
+    </div>
+
+    <div id="loading" class="spinner"></div>
+
+    <div id="resultDisplay" class="report-display" style="display: none;">
+        <h2>Analysis Result</h2>
+        <div class="report-section">
+            <p><strong>SHA256:</strong> <span id="resultSha"></span></p>
+            <p><strong>Filename:</strong> <span id="resultFilename"></span></p>
+            <p><strong>Size:</strong> <span id="resultSize"></span></p>
+            <p><strong>Score:</strong> <span id="resultScore"></span>/100</p>
+            <p><strong>Verdict:</strong> <strong id="resultVerdict"></strong></p>
+        </div>
+        <div class="report-section">
+            <h3>Reasons</h3>
+            <ul id="resultReasons" class="reason-list"></ul>
+        </div>
+        <div class="report-section">
+            <h3>Extracted Features</h3>
+            <pre id="resultFeatures"></pre>
+        </div>
+    </div>
+
+    <hr>
+
+    <div id="reportsHistory">
+        <h2>Recent Reports</h2>
+        <table id="reportsTable">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>SHA256</th>
+                    <th>Verdict</th>
+                    <th>Score</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://127.0.0.1:8000';
+
+    const apkFileEl = document.getElementById('apkFile');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loadingEl = document.getElementById('loading');
+    const resultDisplayEl = document.getElementById('resultDisplay');
+    const reportsTableBodyEl = document.getElementById('reportsTable').querySelector('tbody');
+
+    analyzeBtn.addEventListener('click', analyzeApk);
+
+    async function analyzeApk() {
+        const file = apkFileEl.files[0];
+        if (!file) {
+            alert('Please select an APK file to analyze.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        loadingEl.style.display = 'block';
+        resultDisplayEl.style.display = 'none';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/analyze`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(`Error: ${data.detail}`);
+                return;
+            }
+
+            displayResult(data);
+            fetchReports(); // Refresh the reports list
+        } catch (error) {
+            console.error('Analysis failed:', error);
+            alert('An error occurred during analysis.');
+        } finally {
+            loadingEl.style.display = 'none';
+        }
+    }
+
+    function displayResult(report) {
+        document.getElementById('resultSha').textContent = report.sha256;
+        document.getElementById('resultFilename').textContent = report.filename;
+        document.getElementById('resultSize').textContent = `${(report.size_bytes / 1024 / 1024).toFixed(2)} MB`;
+        document.getElementById('resultScore').textContent = report.score.toFixed(2);
+
+        const verdictEl = document.getElementById('resultVerdict');
+        verdictEl.textContent = report.verdict;
+        verdictEl.className = ''; // Reset class
+        verdictEl.classList.add(`verdict-${report.verdict.toLowerCase()}`);
+
+        const reasonsList = document.getElementById('resultReasons');
+        reasonsList.innerHTML = '';
+        report.reasons.forEach(reason => {
+            const li = document.createElement('li');
+            li.textContent = reason.detail;
+            reasonsList.appendChild(li);
+        });
+
+        document.getElementById('resultFeatures').textContent = JSON.stringify(report.features, null, 2);
+        
+        resultDisplayEl.style.display = 'block';
+    }
+
+    async function fetchReports() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/reports`);
+            const reports = await response.json();
+
+            reportsTableBodyEl.innerHTML = '';
+            reports.forEach(report => {
+                const row = reportsTableBodyEl.insertRow();
+                row.innerHTML = `
+                    <td>${report.filename}</td>
+                    <td>${report.sha256.substring(0, 12)}...</td>
+                    <td class="verdict-${report.verdict.toLowerCase()}"><strong>${report.verdict}</strong></td>
+                    <td>${report.score.toFixed(2)}</td>
+                    <td>${new Date(report.created_at).toLocaleString()}</td>
+                `;
+                row.style.cursor = 'pointer';
+                row.addEventListener('click', () => {
+                    displayResult(report);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+        } catch (error) {
+            console.error('Failed to fetch reports:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchReports);
+</script>
+
+</body>
+</html>

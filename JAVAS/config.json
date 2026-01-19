@@ -1,0 +1,7 @@
+{
+    "user_name": "Boss",
+    "wake_word": "aura",
+    "music_directory": "C:\\Path\\To\\Your\\Music\\Folder",
+    "weather_api_key": "YOUR_OPENWEATHERMAP_API_KEY",
+    "city": "Bhopal"
+}
