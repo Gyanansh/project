@@ -4,7 +4,7 @@ from fastapi import HTTPException
 
 class LLMService:
     def __init__(self):
-        self.api_key = os.getenv("AIzaSyBPLPrNPxuk4eQVub-vqa8yFpL8OX0ZFn0")
+        self.api_key = os.getenv("Enter your API key")
         self.client = None
         if self.api_key:
             openai.api_key = self.api_key
@@ -57,3 +57,4 @@ class LLMService:
         return await self._call_llm(system, user)
 
 llm_service = LLMService()
+
