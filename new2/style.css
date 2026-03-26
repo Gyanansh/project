@@ -1,0 +1,88 @@
+:root {
+    --bg-dark: #05070a;
+    --accent: #4cc9f0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: radial-gradient(circle at center, #1b263b 0%, #05070a 100%);
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.header {
+    position: absolute; top: 20px; width: 100%; text-align: center; z-index: 10;
+}
+.header h1 { letter-spacing: 8px; font-weight: 300; color: var(--accent); }
+.header p { color: #888; font-size: 0.9rem; }
+
+.space-container {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+}
+
+.solar-system { position: relative; display: flex; align-items: center; justify-content: center; }
+
+.sun {
+    width: 50px; height: 50px; background: #ffcc00; border-radius: 50%;
+    box-shadow: 0 0 50px #ff9900; z-index: 2;
+}
+
+/* THE FIX: pointer-events: none allows clicking through the orbit rings */
+.orbit {
+    position: absolute; border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%; width: var(--size); height: var(--size);
+    animation: rotate var(--speed) linear infinite;
+    pointer-events: none; 
+}
+
+/* THE FIX: pointer-events: auto makes the planet itself clickable */
+.planet {
+    position: absolute; top: 50%; left: -8px; border-radius: 50%; 
+    transform: translateY(-50%); cursor: pointer;
+    pointer-events: auto; 
+    transition: transform 0.3s;
+}
+
+.planet:hover { transform: translateY(-50%) scale(1.6); box-shadow: 0 0 15px white; }
+
+/* Planet Colors & Sizes */
+.mercury { width: 10px; height: 10px; background: #9e9e9e; }
+.venus { width: 16px; height: 16px; background: #e3bb76; }
+.earth { width: 18px; height: 18px; background: #2271b3; box-shadow: 0 0 8px #2271b3; }
+.mars { width: 14px; height: 14px; background: #e27b58; }
+.jupiter { width: 34px; height: 34px; background: #d39c7e; }
+.saturn { width: 30px; height: 30px; background: #c5ab6e; outline: 3px solid rgba(255,255,255,0.1); outline-offset: 2px; }
+.uranus { width: 22px; height: 22px; background: #bbe1e4; }
+.neptune { width: 22px; height: 22px; background: #6081ff; }
+
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Modal Design */
+.modal {
+    display: none; position: fixed; z-index: 100; left: 0; top: 0;
+    width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+}
+
+.modal-content.glass {
+    margin: 12% auto; padding: 35px; width: 400px; border-radius: 25px;
+    background: rgba(255, 255, 255, 0.05);
+    /* Cross-browser glass effect fix */
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.stats-row { display: flex; gap: 20px; margin: 25px 0; }
+.stat-item { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; flex: 1; text-align: center; }
+.stat-item strong { color: var(--accent); display: block; margin-bottom: 5px; font-size: 0.8rem; text-transform: uppercase; }
+
+.description-area p { color: #bbb; line-height: 1.6; margin-top: 10px; }
+.close-btn { float: right; cursor: pointer; font-size: 30px; color: var(--accent); margin-top: -10px; }

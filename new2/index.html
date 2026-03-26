@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Solar System Explorer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="space-container">
+        <div class="header">
+            <h1>COSMOS EXPLORER</h1>
+            <p>Click any planet to reveal its data</p>
+        </div>
+
+        <div class="solar-system">
+            <div class="sun"></div>
+            
+            <div class="orbit" style="--size: 100px; --speed: 6s">
+                <div class="planet mercury" onclick="openModal('Mercury')"></div>
+            </div>
+            <div class="orbit" style="--size: 150px; --speed: 10s">
+                <div class="planet venus" onclick="openModal('Venus')"></div>
+            </div>
+            <div class="orbit" style="--size: 210px; --speed: 14s">
+                <div class="planet earth" onclick="openModal('Earth')"></div>
+            </div>
+            <div class="orbit" style="--size: 270px; --speed: 20s">
+                <div class="planet mars" onclick="openModal('Mars')"></div>
+            </div>
+            <div class="orbit" style="--size: 370px; --speed: 35s">
+                <div class="planet jupiter" onclick="openModal('Jupiter')"></div>
+            </div>
+            <div class="orbit" style="--size: 470px; --speed: 50s">
+                <div class="planet saturn" onclick="openModal('Saturn')"></div>
+            </div>
+            <div class="orbit" style="--size: 560px; --speed: 65s">
+                <div class="planet uranus" onclick="openModal('Uranus')"></div>
+            </div>
+            <div class="orbit" style="--size: 650px; --speed: 85s">
+                <div class="planet neptune" onclick="openModal('Neptune')"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="planetModal" class="modal">
+        <div class="modal-content glass">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="m-name">Planet</h2>
+            <div class="stats-row">
+                <div class="stat-item"><strong>Gravity</strong><p id="m-grav">-</p></div>
+                <div class="stat-item"><strong>Temp</strong><p id="m-temp">-</p></div>
+            </div>
+            <div class="description-area">
+                <strong>Overview:</strong>
+                <p id="m-desc">-</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
